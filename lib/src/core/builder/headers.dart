@@ -1,3 +1,4 @@
+import 'package:dart_openai/src/core/constants/config.dart';
 import 'package:meta/meta.dart';
 import 'package:dart_openai/src/core/utils/logger.dart';
 
@@ -7,6 +8,9 @@ import 'package:dart_openai/src/core/utils/logger.dart';
 @immutable
 @internal
 abstract class HeadersBuilder {
+  /// This is used to check if the Azure API key is set or not.
+  static bool isAzureOpenAI = false;
+
   /// {@template headers_builder_api_key}
   /// This is used to store the API key if it is set.
   /// {@endtemplate}
@@ -39,8 +43,13 @@ abstract class HeadersBuilder {
 
   @internal
   static set apiKey(String? apiKey) {
-    _apiKey = apiKey;
-    OpenAILogger.logAPIKey(_apiKey);
+    if (isAzureOpenAI) {
+      _apiKey = apiKey;
+      OpenAILogger.logAzureAPIKey(_apiKey);
+    } else {
+      _apiKey = apiKey;
+      OpenAILogger.logAPIKey(_apiKey);
+    }
   }
 
   /// {@macro headers_builder}
@@ -55,19 +64,45 @@ abstract class HeadersBuilder {
       'Content-Type': 'application/json',
     };
 
-    assert(
-      apiKey != null,
-      """
+    final authorizationHeaders = <String, String>{};
+
+    if (isAzureOpenAI) {
+      assert(
+        _apiKey != null,
+        """
+        You must set the Azure API key before making building any headers for a request.""",
+      );
+
+      authorizationHeaders["api-key"] = apiKey!;
+    } else {
+      assert(
+        apiKey != null,
+        """
       You must set the API key before making building any headers for a request.""",
-    );
+      );
+      authorizationHeaders["Authorization"] = "Bearer $apiKey";
+    }
+
     headers = {
       ...headers,
       ..._additionalHeadersToRequests,
       if (isOrganizationSet) 'OpenAI-Organization': organization!,
-      "Authorization": "Bearer $apiKey",
+      //"Authorization": "Bearer $apiKey",
+      ...authorizationHeader(),
+//       ...authorizationHeaders,
+
     };
 
     return headers;
+  }
+
+  @internal
+  static Map<String, String> authorizationHeader() {
+    if (OpenAIConfig.aiType == OpenAIType.azure) {
+      return {"api-key": "$apiKey"};
+    }
+
+    return {"Authorization": "Bearer $apiKey"};
   }
 
   /// Will save the given [headers] to the [_additionalHeadersToRequests] map. so it will be used in all requests.

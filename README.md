@@ -69,6 +69,13 @@ Consider helping this project you too.
   - [x] With events `Stream` responses.
 - [x] [Moderation](#moderations)
 
+### Support Azure OpenAI API
+- [x] [Chat (chatGPT)](#support-azure-openai)
+  - [x] With `Stream` responses.
+- [ ] [Completions](#completions)
+- [ ] [Images](#images)
+- [ ] ....
+
 ## 💫 Testing Progress (100 %)
 
 - [x] [Authentication](#authentication)
@@ -164,7 +171,7 @@ OpenAI.baseUrl = "https://api.openai.com/v1"; // the default one.
 
 ### Enable debugging and logs
 You can make the package logs the operations flows and steps by setting the `showLogs`:
-  
+
 ```dart
 OpenAI.showLogs = true;
 ```
@@ -179,6 +186,18 @@ OpenAI.showResponsesLogs = true;
 
 This will log the raw responses that are returned from the API, such when the request is successful, or when it failed. (This don't include the stream responses).
 
+### Support Azure OpenAI
+```dart
+AzureOpenAI.apiKey = 'Your key';
+AzureOpenAI.baseURL = 'the endpoint of your resource.';
+final azureOpenAI = AzureOpenAI.instance;
+Stream<OpenAIStreamChatCompletionModel> chatCompletionStream =
+          azureOpenAI.chat.createStream(
+            model: 'deployment name of your model'
+            ...
+          );
+```
+
 ## Models
 
 ### List Models
@@ -188,7 +207,7 @@ Lists the currently available models, and provides information about each one su
 ```dart
 List<OpenAIModelModel> models = await OpenAI.instance.model.list();
 OpenAIModelModel firstModel = models.first;
- 
+
 print(firstModel.id); // ...
 print(firstModel.permission); // ...
 ```
@@ -797,8 +816,44 @@ try {
 }
 ```
 
-</br>
-</br>
+
+# Azure OpenAI
+if you want to use Azure OpenAI service instead of the direct OpenAI APIs, you will only need to use `AzureOpenAI` instead of `OpenAI` in your code, this will provide you with the same package interface for the availabe methods, However you will need to configure the REST API and use Your Azure OpenAI API key instead of the OpenAI API key.
+
+```dart
+// Set your API key.
+AzureOpenAI.apiKey = "YOUR_AZURE_OPENAI_API_KEY";
+
+// configure your REST API with your deployment information.
+AzureOpenAI.configureRestAPI(
+  yourResourceName: "your_resource_name",
+  yourDeploymentName: "your_deployment_name",
+  apiVersion: DateTime(2023, 06, 01),
+);
+```
+
+Now, as example to create a completion, you can use the `AzureOpenAI.instance.completion.create()` method instead of `OpenAI.instance.completion.create()`.
+
+```dart
+OpenAICompletionModel completion = await AzureOpenAI.instance.completion.create(
+  prompt: "Dart is a progr",
+  maxTokens: 20,
+  temperature: 0.5,
+  n: 1,
+  stop: ["\n"],
+  echo: true,
+);
+
+print(completion.choices); 
+```
+
+This request now will be sent to `https://your_resource_name.openai.azure.com/openai/deployments/your_deployment_name/chat/completion?api-version=2023-06-01`.
+
+Learn more about the [Azure OpenAI endpoints & REST API](https://azure.microsoft.com/en-us/products/ai-services/openai-service/).
+
+<br>
+<br>
+
 
 ### Want To Help ?
 
