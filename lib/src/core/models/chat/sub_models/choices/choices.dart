@@ -4,10 +4,6 @@ import 'sub_models/message.dart';
 /// This class represents a choice of the [OpenAIChatCompletionModel] model of the OpenAI API, which is used and get returned while using the [OpenAIChat] methods.
 /// {@endtemplate}
 final class OpenAIChatCompletionChoiceModel {
-  /// The [index] of the choice.
-
-  //! This is dynamic because the API sometimes returns a [String] and sometimes an [int].
-  final index;
 
   /// The [message] of the choice.
   final OpenAIChatCompletionChoiceMessageModel message;
@@ -20,12 +16,11 @@ final class OpenAIChatCompletionChoiceModel {
 
   @override
   int get hashCode {
-    return index.hashCode ^ message.hashCode ^ finishReason.hashCode;
+    return message.hashCode ^ finishReason.hashCode;
   }
 
   /// {@macro openai_chat_completion_choice}
   const OpenAIChatCompletionChoiceModel({
-    required this.index,
     required this.message,
     required this.finishReason,
   });
@@ -33,10 +28,6 @@ final class OpenAIChatCompletionChoiceModel {
   /// This is used  to convert a [Map<String, dynamic>] object to a [OpenAIChatCompletionChoiceModel] object.
   factory OpenAIChatCompletionChoiceModel.fromMap(Map<String, dynamic> json) {
     return OpenAIChatCompletionChoiceModel(
-//! Here we use the [int.tryParse] method to convert the [String] to an [int] if it's possible, otherwise we use the [String] value.
-      index: json['index'] is int
-          ? json['index']
-          : int.tryParse(json['index'].toString()) ?? json['index'],
       message: OpenAIChatCompletionChoiceMessageModel.fromMap(json['message']),
       finishReason: json['finish_reason'],
     );
@@ -45,7 +36,6 @@ final class OpenAIChatCompletionChoiceModel {
   /// This method used to convert the [OpenAIChatCompletionChoiceModel] to a [Map<String, dynamic>] object.
   Map<String, dynamic> toMap() {
     return {
-      "index": index,
       "message": message.toMap(),
       "finish_reason": finishReason,
     };
@@ -53,7 +43,7 @@ final class OpenAIChatCompletionChoiceModel {
 
   @override
   String toString() {
-    return 'OpenAIChatCompletionChoiceModel(index: $index, message: $message, finishReason: $finishReason)';
+    return 'OpenAIChatCompletionChoiceModel(message: $message, finishReason: $finishReason)';
   }
 
   @override
@@ -61,7 +51,6 @@ final class OpenAIChatCompletionChoiceModel {
     if (identical(this, other)) return true;
 
     return other is OpenAIChatCompletionChoiceModel &&
-        other.index == index &&
         other.message == message &&
         other.finishReason == finishReason;
   }

@@ -5,8 +5,6 @@ export "sub_models/delta.dart";
 /// The [OpenAIStreamChatCompletionChoiceModel] class represents the chat completion choice response model of the OpenAI API, which is used and get returned while using the chat methods that leverages [Stream] functionality.
 /// {@endtemplate}
 final class OpenAIStreamChatCompletionChoiceModel {
-  /// The [index] of the choice.
-  final int index;
 
   /// The [delta] of the choice.
   final OpenAIStreamChatCompletionChoiceDeltaModel delta;
@@ -19,12 +17,11 @@ final class OpenAIStreamChatCompletionChoiceModel {
 
   @override
   int get hashCode {
-    return index.hashCode ^ delta.hashCode ^ finishReason.hashCode;
+    return delta.hashCode ^ finishReason.hashCode;
   }
 
   /// {@macro openai_stream_chat_completion_choice}
   const OpenAIStreamChatCompletionChoiceModel({
-    required this.index,
     required this.delta,
     required this.finishReason,
   });
@@ -34,7 +31,6 @@ final class OpenAIStreamChatCompletionChoiceModel {
     Map<String, dynamic> json,
   ) {
     return OpenAIStreamChatCompletionChoiceModel(
-      index: json['index'],
       delta: OpenAIStreamChatCompletionChoiceDeltaModel.fromMap(json['delta']),
       finishReason: json['finish_reason'],
     );
@@ -42,7 +38,7 @@ final class OpenAIStreamChatCompletionChoiceModel {
 
   @override
   String toString() {
-    return 'OpenAIStreamChatCompletionChoiceModel(index: $index, delta: $delta, finishReason: $finishReason)';
+    return 'OpenAIStreamChatCompletionChoiceModel(delta: $delta, finishReason: $finishReason)';
   }
 
   @override
@@ -50,7 +46,6 @@ final class OpenAIStreamChatCompletionChoiceModel {
     if (identical(this, other)) return true;
 
     return other is OpenAIStreamChatCompletionChoiceModel &&
-        other.index == index &&
         other.delta == delta &&
         other.finishReason == finishReason;
   }
